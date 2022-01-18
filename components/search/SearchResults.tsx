@@ -171,21 +171,29 @@ export default function SearchResults() {
 
   return (
     <section className="text-white relative">
-      <nav className="flex justify-between items-center bg-lightdark p-3">
+      <nav className="flex justify-between items-center bg-lightdark px-3 py-3">
         <div
           className="h-6 lg:h-8 flex-shrink-0 cursor-pointer"
           onClick={() => router.push('/')}
         >
-          <img src="/logo.png" className="object-contain h-full" />
+          <img
+            src="/logo.png"
+            className="object-contain h-full hidden lg:block"
+          />
+          <img
+            src="/logo_mobile.svg.png"
+            className="object-contain h-full lg:hidden"
+          />
         </div>
 
-        <div className="hidden lg:flex items-center">
+        <div className="flex items-center">
           <form onSubmit={handleSearchInputSubmit}>
             <input
               ref={searchInputRef}
               placeholder="Search"
               className="
-                px-3 py-2 bg-dark text-gray-300 w-[400px] border border-light outline-none
+                px-2 lg:px-3 py-1 lg:py-2 bg-dark text-gray-300 w-[200px] lg:w-[400px] border border-light outline-none
+                text-sm lg:text-base
               "
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -194,9 +202,9 @@ export default function SearchResults() {
 
           <div
             onClick={() => handleSearchInputSubmit(null)}
-            className="bg-light h-[42px] w-[60px] flex justify-center items-center cursor-pointer"
+            className="bg-light h-[30px] lg:h-[42px] w-[40px] lg:w-[60px] flex justify-center items-center cursor-pointer"
           >
-            <IoIosSearch className="text-gray-300 text-2xl" />
+            <IoIosSearch className="text-gray-300 text-xl lg:text-2xl" />
           </div>
         </div>
 
@@ -204,21 +212,21 @@ export default function SearchResults() {
         {!auth && (
           <div
             onClick={signIn}
-            className="border border-blue-400 px-3 py-1.5 hidden lg:flex items-center cursor-pointer"
+            className="lg:border border-blue-400 lg:px-3 py-1.5 flex items-center cursor-pointer"
           >
-            <CgProfile className="text-blue-400 mr-1 text-[20px]" />
-            <p className="text-blue-400 font-bold">SIGN IN</p>
+            <CgProfile className="text-blue-400 mr-1 text-[22px] lg:text-[20px]" />
+            <p className="hidden lg:block text-blue-400 font-bold">SIGN IN</p>
           </div>
         )}
 
         {auth && (
           <div
             // className="
-            //   px-3 py-1 rounded border border-red-500 text-red-500 cursor-pointer
+            //   lg:px-3 py-1 rounded border border-red-500 text-red-500 cursor-pointer
             //   hover:bg-red-500 hover:text-white
             //   transition-all duration-300
             // "
-            className="border border-red-500 px-3 py-1.5 flex items-center cursor-pointer"
+            className="lg:border border-red-500 lg:px-3 py-1.5 flex items-center cursor-pointer"
             onClick={() => {
               cookie.remove('token_data');
               setUser(null);
@@ -226,15 +234,15 @@ export default function SearchResults() {
               setData([]);
             }}
           >
-            <MdOutlineLogout className="text-red-500 mr-1 text-[20px]" />
-            <p className="text-red-500 font-bold">LOGOUT</p>
+            <MdOutlineLogout className="text-red-500 mr-1 text-[22px] lg:text-[20px]" />
+            <p className="hidden lg:block text-red-500 font-bold">LOGOUT</p>
           </div>
         )}
       </nav>
       {/* --- */}
 
       {auth && data && (
-        <section className="pt-7 px-10">
+        <section className="pt-3 lg:pt-7 px-5 lg:px-10">
           {data.map((video) => (
             <Video key={video.id} data={video} />
           ))}

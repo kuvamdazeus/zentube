@@ -106,11 +106,11 @@ export default function Video({ data }: Props) {
           color="white"
         />
       </section>
-      <section className="flex mb-7">
+      <section className="lg:flex mb-7">
         <div className="flex-shrink-0">
           <img
             onClick={togglePlayer}
-            className="object-contain cursor-pointer"
+            className="w-full lg:w-max object-cover lg:object-contain cursor-pointer"
             src={data.thumbnails.medium.url}
           />
 
@@ -122,7 +122,7 @@ export default function Video({ data }: Props) {
           </div>
         </div>
 
-        <div className="w-full ml-3">
+        <div className="w-full ml-3 hidden lg:block">
           <p
             onClick={togglePlayer}
             className="font-bold text-lg hover:underline cursor-pointer w-max"
@@ -150,6 +150,28 @@ export default function Video({ data }: Props) {
             {getDescription(data.description)}
           </p>
         </div>
+
+        <div className="flex w-full mt-4 lg:hidden">
+          <img
+            src={data.channelData.thumbnails.default.url}
+            className="object-contain h-10 rounded-full mr-3"
+          />
+
+          <div>
+            <p
+              onClick={togglePlayer}
+              className="font-bold text-sm hover:underline cursor-pointer mb-1"
+            >
+              {data.title}
+            </p>
+
+            <p className="text-xs text-gray-400 font-light">
+              {data.channelData.title} · {getViews(data.viewCount)} ·{' '}
+              {new Date(data.publishedAt).toString().split(' ')[1]}{' '}
+              {new Date(data.publishedAt).toString().split(' ')[3]}
+            </p>
+          </div>
+        </div>
       </section>
 
       {playerData && playerData.id === data.id && (
@@ -170,8 +192,8 @@ export default function Video({ data }: Props) {
               }}
               onPlay={() => setPlayerData({ id: playerData.id, playing: true })}
               onEnded={async () => {
-                if (windowIsFullScreen()) await document.exitFullscreen();
                 setPlayerData(null);
+                if (windowIsFullScreen()) await document.exitFullscreen();
               }}
               onBuffer={() =>
                 setPlayerData({ id: playerData.id, playing: true })
