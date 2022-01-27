@@ -1,26 +1,27 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import router from 'next/router';
 import { useRecoilState } from 'recoil';
+import Player from 'react-player';
+import { IoClose } from 'react-icons/io5';
 import { playerAtom } from '../state/atoms';
 import type { IVideo } from '../types';
-import Player from 'react-player';
-import { FaPlay } from 'react-icons/fa';
-import { IoClose } from 'react-icons/io5';
 
 interface Props {
   data: IVideo;
 }
 
 export default function Video({ data }: Props) {
-  const windowIsFullScreen = () =>
-    window.innerWidth == screen.width && window.innerHeight == screen.height;
+  const getUrlQuery = () =>
+    String(new URL(window.location.href).searchParams.get('q'));
+
+  const getVideoQuery = () =>
+    String(new URL(window.location.href).searchParams.get('id'));
 
   const playerContainerRef = useRef<HTMLElement | null>(null);
 
   const [playerData, setPlayerData] = useRecoilState(playerAtom);
 
-  // const { signIn } = useGoogleLogin({
-  //   clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID,
-  // });
+  const [fullscreen, setFullscreen] = useState(false);
 
   // I HATE YOU YOUTUBE, I HATE YOU
   const getViews = (views: string) => {
@@ -35,7 +36,7 @@ export default function Video({ data }: Props) {
     return `${Math.round(parseInt(views) / 1_000_000_000)}B views`;
   };
 
-  // I HATE YOU YOUTUBE, I HATE YOU
+  // I FUCKIN' HATE YOUTUBE
   const getDuration = (durationStr: string) => {
     let hoursMatch = durationStr.match(/(\d+)H/);
     let minutesMatch = durationStr.match(/(\d+)M/);
@@ -67,21 +68,30 @@ export default function Video({ data }: Props) {
   };
 
   const togglePlayer = () => {
-    if (playerData && playerData.id !== data.id)
-      return setPlayerData({ id: data.id, playing: true });
-
-    if (!playerData) setPlayerData({ id: data.id, playing: true });
-    else setPlayerData(null);
+    setPlayerData({ id: data.id, playing: true });
   };
 
   useEffect(() => {
     window.addEventListener('keypress', async (e) => {
       if (e.key === '`' && playerContainerRef.current) {
-        if (windowIsFullScreen())
-          await playerContainerRef.current.requestFullscreen();
         console.log('REQUESTING FULL SCREEN');
+        setPlayerData({ id: data.id, playing: true });
+        setFullscreen(true);
+        await playerContainerRef.current.requestFullscreen();
       }
     });
+
+    if (getVideoQuery() === data.id) {
+      console.log('Got ID, toggling player');
+      togglePlayer();
+      setTimeout(
+        () =>
+          playerContainerRef.current
+            ? playerContainerRef.current.scrollIntoView()
+            : null,
+        500,
+      );
+    }
   }, []);
 
   return (
@@ -101,7 +111,12 @@ export default function Video({ data }: Props) {
       >
         <div />
         <IoClose
-          onClick={() => setPlayerData(null)}
+          onClick={() => {
+            setPlayerData(null);
+            router.push('/search?q=' + getUrlQuery(), undefined, {
+              shallow: true,
+            });
+          }}
           className="text-2xl text-white cursor-pointer"
           color="white"
         />
@@ -109,7 +124,13 @@ export default function Video({ data }: Props) {
       <section className="lg:flex mb-7">
         <div className="flex-shrink-0">
           <img
-            onClick={togglePlayer}
+            onClick={() => {
+              router.push(
+                '/search?q=' + getUrlQuery() + '&id=' + data.id,
+                undefined,
+                { shallow: true },
+              );
+            }}
             className="w-full lg:w-max object-cover lg:object-contain cursor-pointer"
             src={data.thumbnails.medium.url}
           />
@@ -124,7 +145,13 @@ export default function Video({ data }: Props) {
 
         <div className="w-full ml-3 hidden lg:block">
           <p
-            onClick={togglePlayer}
+            onClick={() => {
+              router.push(
+                '/search?q=' + getUrlQuery() + '&id=' + data.id,
+                undefined,
+                { shallow: true },
+              );
+            }}
             className="font-bold text-lg hover:underline cursor-pointer w-max"
           >
             {data.title}
@@ -151,7 +178,7 @@ export default function Video({ data }: Props) {
           </p>
         </div>
 
-        <div className="flex w-full mt-4 lg:hidden">
+        <div className="flex lg:hidden w-full mt-4">
           <img
             src={data.channelData.thumbnails.default.url}
             className="object-contain h-10 rounded-full mr-3"
@@ -159,7 +186,13 @@ export default function Video({ data }: Props) {
 
           <div>
             <p
-              onClick={togglePlayer}
+              onClick={() => {
+                router.push(
+                  '/search?q=' + getUrlQuery() + '&id=' + data.id,
+                  undefined,
+                  { shallow: true },
+                );
+              }}
               className="font-bold text-sm hover:underline cursor-pointer mb-1"
             >
               {data.title}
@@ -175,45 +208,62 @@ export default function Video({ data }: Props) {
       </section>
 
       {playerData && playerData.id === data.id && (
-        <section
-          ref={playerContainerRef}
-          className="bg-black h-screen relative"
-        >
-          <section className={`${playerData.playing ? 'block' : 'hidden'}`}>
+        <section ref={playerContainerRef} className="bg-black relative">
+          <section>
             <Player
               url={`https://www.youtube.com/watch?v=${playerData.id}`}
               playing={playerData.playing}
-              height="100vh"
+              height={fullscreen ? '100vh' : '400px'}
               width="100%"
               controls
               onPause={async () => {
                 setPlayerData({ id: playerData.id, playing: false });
-                if (windowIsFullScreen()) await document.exitFullscreen();
+                setFullscreen(false);
+                await document.exitFullscreen();
               }}
               onPlay={() => setPlayerData({ id: playerData.id, playing: true })}
               onEnded={async () => {
                 setPlayerData(null);
-                if (windowIsFullScreen()) await document.exitFullscreen();
+                setFullscreen(false);
+                await document.exitFullscreen();
               }}
               onBuffer={() =>
                 setPlayerData({ id: playerData.id, playing: true })
               }
               config={{
-                youtube: { playerVars: { fs: 1, rel: 0, showinfo: 0 } },
+                youtube: { playerVars: { fs: 0, rel: 0, showinfo: 0 } },
               }}
+              playbackRate={playerData.playing ? 1 : 0.25}
+              muted={playerData.playing ? false : true}
             />
           </section>
 
           <section
             className={`
-              flex flex-col items-center justify-center h-screen w-full
-              ${playerData.playing ? 'hidden' : 'block'}
-              border border-dotted bg-black cursor-pointer
+              flex flex-col items-center justify-center h-[348px] w-full
+              cursor-pointer absolute top-0 border ${fullscreen && 'hidden'}
             `}
-            onClick={() => setPlayerData({ id: playerData.id, playing: true })}
+            onClick={() =>
+              setPlayerData({ id: playerData.id, playing: !playerData.playing })
+            }
+          />
+
+          {/* <video
+            controls
+            onPlay={console.log}
+            onPause={console.log}
+            onEnded={console.log}
           >
-            <FaPlay className="text-2xl cursor-pointer mr-5" />
-          </section>
+            <source
+              src={`${process.env.NEXT_PUBLIC_BE}/stream?q=${jwt.sign(
+                {
+                  url: `https://www.youtube.com/watch?v=${playerData.id}`,
+                },
+                process.env.NEXT_PUBLIC_JWT_SECRET as string,
+              )}`}
+              type="video/mp4"
+            />
+          </video> */}
         </section>
       )}
     </section>

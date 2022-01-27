@@ -64,6 +64,7 @@ const Home: NextPage = () => {
     clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
     onSuccess: (data) => handleFame(data as GoogleLoginResponse),
     onFailure: console.error,
+    scope: 'https://www.googleapis.com/auth/youtube.readonly',
   });
 
   useEffect(() => {

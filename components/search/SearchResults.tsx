@@ -19,6 +19,9 @@ export default function SearchResults() {
   const getUrlQuery = () =>
     String(new URL(window.location.href).searchParams.get('q'));
 
+  const getVideoQuery = () =>
+    String(new URL(window.location.href).searchParams.get('id'));
+
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const [user, setUser] = useRecoilState(userAtom);
@@ -41,9 +44,25 @@ export default function SearchResults() {
     }
   };
 
+  // YT, I HATE YOU!!!
   const fetchSearchResults = async (bypassUrlCheck = false) => {
     const cookieData = cookie.load('token_data');
     if (!cookieData) return null;
+
+    const videoCache = sessionStorage.getItem('videos');
+    if (videoCache) {
+      interface _ISessionVideoCache {
+        query: string;
+        data: IVideo[];
+      }
+
+      const cachedData: _ISessionVideoCache = JSON.parse(videoCache);
+
+      if (cachedData.query === getUrlQuery()) {
+        setData(cachedData.data);
+        return null;
+      }
+    }
 
     const { expires_at, access_token }: IGoogleAuthResponse = cookieData;
 
@@ -130,6 +149,10 @@ export default function SearchResults() {
     // 3 FETCH REQUESTS
     // FUCKIN' SWEAR TO GOD, if there's a stupid 400 error, i'm gonna lose it
     setData(data);
+    sessionStorage.setItem(
+      'videos',
+      JSON.stringify({ query: searchInput, data }),
+    );
   };
 
   const handleSuccess = (data: any) => {
@@ -148,19 +171,14 @@ export default function SearchResults() {
     setAuth(true);
   };
 
-  const handleFailure = () => {};
-
   const { signIn } = useGoogleLogin({
     clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
     onSuccess: handleSuccess,
-    onFailure: handleFailure,
+    onFailure: console.error,
     scope: 'https://www.googleapis.com/auth/youtube.readonly',
   });
 
   useEffect(() => {
-    // if (new URL(window.location.href).searchParams.get('action') === 'signin')
-    //   setTimeout(signIn, 1000);
-
     if (cookie.load('token_data')) setAuth(true);
     setSearchInputElem(searchInputRef.current);
   }, []);
