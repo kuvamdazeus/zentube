@@ -241,7 +241,7 @@ export default function Video({ data }: Props) {
           <section
             className={`
               flex flex-col items-center justify-center h-[348px] w-full
-              cursor-pointer absolute top-0 border ${fullscreen && 'hidden'}
+              cursor-pointer absolute top-0
             `}
             onClick={() =>
               setPlayerData({ id: playerData.id, playing: !playerData.playing })

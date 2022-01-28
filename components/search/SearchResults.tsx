@@ -159,7 +159,7 @@ export default function SearchResults() {
     const {
       expires_at,
       access_token,
-    }: { expires_at: number; access_token: string } = data.vc;
+    }: { expires_at: number; access_token: string } = data.tokenObj;
 
     const { name, imageUrl } = data.profileObj;
     setUser({ name, imageUrl });
