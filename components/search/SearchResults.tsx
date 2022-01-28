@@ -58,7 +58,7 @@ export default function SearchResults() {
 
       const cachedData: _ISessionVideoCache = JSON.parse(videoCache);
 
-      if (cachedData.query === getUrlQuery()) {
+      if (cachedData.query === getUrlQuery() && auth) {
         setData(cachedData.data);
         return null;
       }

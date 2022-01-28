@@ -5,6 +5,7 @@ import Player from 'react-player';
 import { IoClose } from 'react-icons/io5';
 import { playerAtom } from '../state/atoms';
 import type { IVideo } from '../types';
+import jwt from 'jsonwebtoken';
 
 interface Props {
   data: IVideo;
@@ -22,6 +23,7 @@ export default function Video({ data }: Props) {
   const [playerData, setPlayerData] = useRecoilState(playerAtom);
 
   const [fullscreen, setFullscreen] = useState(false);
+  const [customPlayer, setCustomPlayer] = useState(false);
 
   // I HATE YOU YOUTUBE, I HATE YOU
   const getViews = (views: string) => {
@@ -92,6 +94,12 @@ export default function Video({ data }: Props) {
         500,
       );
     }
+
+    // Choose for a custom player if the duration is <= 30 minutes, else spawn the normal yet buggy one
+    let duration = getDuration(data.duration).split(':').reverse(); // [SS, MM, HH?]
+    if (duration.length < 3 && parseInt(duration[1]) <= 30) {
+      setCustomPlayer(true);
+    } else setCustomPlayer(false);
   }, []);
 
   return (
@@ -209,61 +217,72 @@ export default function Video({ data }: Props) {
 
       {playerData && playerData.id === data.id && (
         <section ref={playerContainerRef} className="bg-black relative">
-          <section>
-            <Player
-              url={`https://www.youtube.com/watch?v=${playerData.id}`}
-              playing={playerData.playing}
-              height={fullscreen ? '100vh' : '400px'}
-              width="100%"
-              controls
-              onPause={async () => {
-                setPlayerData({ id: playerData.id, playing: false });
-                setFullscreen(false);
-                await document.exitFullscreen();
-              }}
-              onPlay={() => setPlayerData({ id: playerData.id, playing: true })}
-              onEnded={async () => {
-                setPlayerData(null);
-                setFullscreen(false);
-                await document.exitFullscreen();
-              }}
-              onBuffer={() =>
-                setPlayerData({ id: playerData.id, playing: true })
-              }
-              config={{
-                youtube: { playerVars: { fs: 0, rel: 0, showinfo: 0 } },
-              }}
-              playbackRate={playerData.playing ? 1 : 0.25}
-              muted={playerData.playing ? false : true}
-            />
-          </section>
+          {!customPlayer && (
+            <>
+              <section>
+                <Player
+                  url={`https://www.youtube.com/watch?v=${playerData.id}`}
+                  playing={playerData.playing}
+                  height={fullscreen ? '100vh' : '400px'}
+                  width="100%"
+                  controls
+                  onPause={async () => {
+                    setPlayerData({ id: playerData.id, playing: false });
+                    setFullscreen(false);
+                    await document.exitFullscreen();
+                  }}
+                  onPlay={() =>
+                    setPlayerData({ id: playerData.id, playing: true })
+                  }
+                  onEnded={async () => {
+                    setPlayerData(null);
+                    setFullscreen(false);
+                    await document.exitFullscreen();
+                  }}
+                  onBuffer={() =>
+                    setPlayerData({ id: playerData.id, playing: true })
+                  }
+                  config={{
+                    youtube: { playerVars: { fs: 0, rel: 0, showinfo: 0 } },
+                  }}
+                  playbackRate={playerData.playing ? 1 : 0.25}
+                  muted={playerData.playing ? false : true}
+                />
+              </section>
 
-          <section
-            className={`
+              <section
+                className={`
               flex flex-col items-center justify-center h-[348px] w-full
               cursor-pointer absolute top-0
             `}
-            onClick={() =>
-              setPlayerData({ id: playerData.id, playing: !playerData.playing })
-            }
-          />
+                onClick={() =>
+                  setPlayerData({
+                    id: playerData.id,
+                    playing: !playerData.playing,
+                  })
+                }
+              />
+            </>
+          )}
 
-          {/* <video
-            controls
-            onPlay={console.log}
-            onPause={console.log}
-            onEnded={console.log}
-          >
-            <source
-              src={`${process.env.NEXT_PUBLIC_BE}/stream?q=${jwt.sign(
-                {
-                  url: `https://www.youtube.com/watch?v=${playerData.id}`,
-                },
-                process.env.NEXT_PUBLIC_JWT_SECRET as string,
-              )}`}
-              type="video/mp4"
-            />
-          </video> */}
+          {customPlayer && (
+            <video
+              controls
+              onPlay={console.log}
+              onPause={console.log}
+              onEnded={console.log}
+            >
+              <source
+                src={`${process.env.NEXT_PUBLIC_BE}/stream?q=${jwt.sign(
+                  {
+                    url: `https://www.youtube.com/watch?v=${playerData.id}`,
+                  },
+                  process.env.NEXT_PUBLIC_JWT_SECRET as string,
+                )}`}
+                type="video/mp4"
+              />
+            </video>
+          )}
         </section>
       )}
     </section>

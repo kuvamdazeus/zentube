@@ -23,7 +23,7 @@ export default function StreamTest() {
   return (
     <section className="text-white">
       <p>STREAM</p>
-      <video controls>
+      <video controls className="h-96">
         <source
           src={`${process.env.NEXT_PUBLIC_BE}/stream?q=${jwt.sign(
             {
@@ -34,10 +34,6 @@ export default function StreamTest() {
           type="video/mp4"
         />
       </video>
-
-      {/* <video controls>
-        <source src="blob:https://www.youtube-nocookie.com/3262a493-fd3a-4010-9908-42e9bacc1180https://www.youtube-nocookie.com/embed/DFup8QRqur0/?controls=1&enablejsapi=1&modestbranding=1&showinfo=0&origin=https%3A%2F%2Fwww.khanacademy.org&iv_load_policy=3&html5=1&fs=1&rel=0&hl=en&cc_lang_pref=en&cc_load_policy=0&start=0" />
-      </video> */}
     </section>
   );
 }

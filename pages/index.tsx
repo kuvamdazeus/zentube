@@ -43,7 +43,8 @@ const Home: NextPage = () => {
     const tokenData = cookie.load('token_data');
 
     if (!tokenData) signIn();
-    else if (!!searchInput.trim()) router.push('/search?q=' + searchInputQuery);
+    else if (tokenData && !!searchInput.trim())
+      router.push('/search?q=' + searchInputQuery);
   };
 
   const handleFame = (data: GoogleLoginResponse) => {
