@@ -3,7 +3,7 @@ import type { NextPage } from 'next';
 import router from 'next/router';
 import { GoogleLoginResponse, useGoogleLogin } from 'react-google-login';
 import { useSetRecoilState } from 'recoil';
-import { authAtom, streamServerStateAtom, userAtom } from '../state/atoms';
+import { authAtom, userAtom } from '../state/atoms';
 import cookie from 'react-cookies';
 
 const Home: NextPage = () => {
@@ -16,7 +16,6 @@ const Home: NextPage = () => {
 
   const setUser = useSetRecoilState(userAtom);
   const setAuth = useSetRecoilState(authAtom);
-  const setStreamServerState = useSetRecoilState(streamServerStateAtom);
 
   const onSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -71,14 +70,6 @@ const Home: NextPage = () => {
   useEffect(() => {
     // TODO: Make keyboard operable suggestion box & componentiate the thing
     if (searchInputRef.current) searchInputRef.current.focus();
-
-    // ping the streaming server as heroku dynos sleep more than they work
-    (async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BE}`);
-      if (res.status === 200) {
-        setStreamServerState('up');
-      } else setStreamServerState('down');
-    })();
   }, []);
 
   return (

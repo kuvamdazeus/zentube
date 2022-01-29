@@ -3,11 +3,7 @@ import router from 'next/router';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import Player from 'react-player';
 import { IoClose } from 'react-icons/io5';
-import {
-  customPlayerAtom,
-  playerAtom,
-  streamServerStateAtom,
-} from '../state/atoms';
+import { playerAtom } from '../state/atoms';
 import type { IVideo } from '../types';
 import jwt from 'jsonwebtoken';
 
@@ -25,9 +21,6 @@ export default function Video({ data }: Props) {
   const playerContainerRef = useRef<HTMLElement | null>(null);
 
   const [playerData, setPlayerData] = useRecoilState(playerAtom);
-  const [customPlayer, setCustomPlayer] = useRecoilState(customPlayerAtom);
-
-  const streamServerState = useRecoilValue(streamServerStateAtom);
 
   const [fullscreen, setFullscreen] = useState(false);
 
@@ -80,14 +73,14 @@ export default function Video({ data }: Props) {
   };
 
   useEffect(() => {
-    window.addEventListener('keypress', async (e) => {
-      if (e.key === '`' && playerContainerRef.current) {
-        console.log('REQUESTING FULL SCREEN');
-        setPlayerData({ id: data.id, playing: true });
-        setFullscreen(true);
-        await playerContainerRef.current.requestFullscreen();
-      }
-    });
+    // window.addEventListener('keypress', async (e) => {
+    //   if (e.key === '`' && playerContainerRef.current) {
+    //     console.log('REQUESTING FULL SCREEN');
+    //     setPlayerData({ id: data.id, playing: true });
+    //     setFullscreen(true);
+    //     await playerContainerRef.current.requestFullscreen();
+    //   }
+    // });
 
     if (getVideoQuery() === data.id) {
       console.log('Got ID, toggling player');
@@ -102,14 +95,10 @@ export default function Video({ data }: Props) {
     }
 
     // Choose for a custom player if the duration is <= 30 minutes, else spawn the normal yet buggy one
-    let duration = getDuration(data.duration).split(':').reverse(); // [SS, MM, HH?]
-    if (
-      duration.length < 3 &&
-      parseInt(duration[1]) <= 30 &&
-      streamServerState === 'up'
-    ) {
-      setCustomPlayer(true);
-    } else setCustomPlayer(false);
+    // let duration = getDuration(data.duration).split(':').reverse(); // [SS, MM, HH?]
+    // if (duration.length < 3 && parseInt(duration[1]) <= 30) {
+    //   setCustomPlayer(true);
+    // } else setCustomPlayer(false);
   }, []);
 
   return (
@@ -227,40 +216,36 @@ export default function Video({ data }: Props) {
 
       {playerData && playerData.id === data.id && (
         <section ref={playerContainerRef} className="bg-black relative">
-          {!customPlayer && (
-            <>
-              <section>
-                <Player
-                  url={`https://www.youtube.com/watch?v=${playerData.id}`}
-                  playing={playerData.playing}
-                  height={fullscreen ? '100vh' : '400px'}
-                  width="100%"
-                  controls
-                  onPause={async () => {
-                    setPlayerData({ id: playerData.id, playing: false });
-                    // setFullscreen(false);
-                    // await document.exitFullscreen();
-                  }}
-                  onPlay={() =>
-                    setPlayerData({ id: playerData.id, playing: true })
-                  }
-                  onEnded={async () => {
-                    setPlayerData(null);
-                    setFullscreen(false);
-                    await document.exitFullscreen();
-                  }}
-                  onBuffer={() =>
-                    setPlayerData({ id: playerData.id, playing: true })
-                  }
-                  config={{
-                    youtube: { playerVars: { fs: 1, rel: 0, showinfo: 0 } },
-                  }}
-                  playbackRate={playerData.playing ? 1 : 0.25}
-                  muted={playerData.playing ? false : true}
-                />
-              </section>
+          <section>
+            <Player
+              url={`https://www.youtube.com/watch?v=${playerData.id}`}
+              playing={playerData.playing}
+              height={fullscreen ? '100vh' : '400px'}
+              width="100%"
+              controls
+              onPause={async () => {
+                setPlayerData({ id: playerData.id, playing: false });
+                // setFullscreen(false);
+                // await document.exitFullscreen();
+              }}
+              onPlay={() => setPlayerData({ id: playerData.id, playing: true })}
+              onEnded={async () => {
+                setPlayerData(null);
+                setFullscreen(false);
+                await document.exitFullscreen();
+              }}
+              onBuffer={() =>
+                setPlayerData({ id: playerData.id, playing: true })
+              }
+              config={{
+                youtube: { playerVars: { fs: 1, rel: 0, showinfo: 0 } },
+              }}
+              playbackRate={playerData.playing ? 1 : 0.25}
+              muted={playerData.playing ? false : true}
+            />
+          </section>
 
-              {/* <section
+          {/* <section
                 className={`
                   flex flex-col items-center justify-center h-[348px] w-full
                   cursor-pointer absolute top-0
@@ -272,10 +257,8 @@ export default function Video({ data }: Props) {
                   })
                 }
               /> */}
-            </>
-          )}
 
-          {customPlayer && (
+          {/* {customPlayer && (
             <video
               controls
               onPlay={console.log}
@@ -292,7 +275,7 @@ export default function Video({ data }: Props) {
                 type="video/mp4"
               />
             </video>
-          )}
+          )} */}
         </section>
       )}
     </section>

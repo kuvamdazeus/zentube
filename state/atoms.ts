@@ -1,5 +1,5 @@
 import { atom } from 'recoil';
-import { IPlayer, IStreamServerState, IUser } from '../types';
+import { IPlayer, IUser } from '../types';
 
 export const userAtom = atom<IUser | null>({
   key: 'userAtom',
@@ -26,7 +26,7 @@ export const customPlayerAtom = atom({
   default: false,
 });
 
-export const streamServerStateAtom = atom<IStreamServerState>({
-  key: 'streamServerState',
-  default: 'down',
-});
+// export const streamServerStateAtom = atom<IStreamServerState>({
+//   key: 'streamServerState',
+//   default: 'down',
+// });

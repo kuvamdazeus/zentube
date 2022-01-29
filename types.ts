@@ -4,7 +4,7 @@ interface Thumbnail {
   url: string;
 }
 
-export type IStreamServerState = 'down' | 'up';
+// export type IStreamServerState = 'down' | 'up';
 
 export interface IGoogleAuthResponse {
   expires_at: number;

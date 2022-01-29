@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { IoIosSearch } from 'react-icons/io';
 import { CgProfile } from 'react-icons/cg';
 import { MdOutlineLogout } from 'react-icons/md';
@@ -30,8 +30,11 @@ export default function SearchResults() {
     searchInputAtom,
   );
 
+  const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchInput, setSearchInput] = useState<string>(getUrlQuery());
   const [data, setData] = useState<IVideo[]>([]);
+  const [searchInputTimer, setSearchInputTimer] =
+    useState<NodeJS.Timeout | null>(null);
 
   const handleSearchInputSubmit = (
     e: React.FormEvent<HTMLFormElement> | null,
@@ -58,7 +61,7 @@ export default function SearchResults() {
 
       const cachedData: _ISessionVideoCache = JSON.parse(videoCache);
 
-      if (cachedData.query === getUrlQuery() && auth) {
+      if (cachedData.query === getUrlQuery().toLowerCase() && auth) {
         setData(cachedData.data);
         return null;
       }
@@ -171,6 +174,22 @@ export default function SearchResults() {
     setAuth(true);
   };
 
+  const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+    setSearchResults([]);
+
+    if (!e.target.value.trim()) return;
+
+    clearTimeout(searchInputTimer as NodeJS.Timeout);
+    setSearchInputTimer(
+      setTimeout(async () => {
+        const res = await fetch(`/api/search?q=${e.target.value}`);
+        const data = await res.json();
+        setSearchResults(data);
+      }, 300),
+    );
+  };
+
   const { signIn } = useGoogleLogin({
     clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
     onSuccess: handleSuccess,
@@ -214,7 +233,7 @@ export default function SearchResults() {
                 text-sm lg:text-base
               "
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={handleSearchInputChange}
             />
           </form>
 
@@ -283,6 +302,30 @@ export default function SearchResults() {
       )}
 
       {/* --- */}
+
+      {searchInput.trim().length !== 0 && searchResults && (
+        <section className="absolute top-[53px] w-full flex justify-center">
+          <div className="w-80 lg:w-[420px] bg-lightdark">
+            {searchResults.slice(0, 5).map((searchResult) => (
+              <section
+                className="
+                    border-b border-t border-[rgb(45,45,45)] p-2 cursor-pointer hover:bg-light
+                  "
+                onClick={() => {
+                  setSearchInput(searchInput + searchResult);
+                  setSearchResults([]);
+                  if (searchInputRef.current) searchInputRef.current.focus();
+                }}
+              >
+                <p className="text-gray-300">
+                  {searchInput}
+                  <span className="text-white font-bold">{searchResult}</span>
+                </p>
+              </section>
+            ))}
+          </div>
+        </section>
+      )}
     </section>
   );
 }
