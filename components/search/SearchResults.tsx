@@ -305,7 +305,7 @@ export default function SearchResults() {
 
       {searchInput.trim().length !== 0 && searchResults && (
         <section className="absolute top-[53px] w-full flex justify-center">
-          <div className="w-80 lg:w-[420px] bg-lightdark">
+          <div className="w-80 lg:w-[446px] bg-lightdark">
             {searchResults.slice(0, 5).map((searchResult) => (
               <section
                 className="
