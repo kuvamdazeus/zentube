@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import router from 'next/router';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import Player from 'react-player';
 import { IoClose } from 'react-icons/io5';
-import { playerAtom } from '../state/atoms';
+import {
+  customPlayerAtom,
+  playerAtom,
+  streamServerStateAtom,
+} from '../state/atoms';
 import type { IVideo } from '../types';
 import jwt from 'jsonwebtoken';
 
@@ -21,9 +25,11 @@ export default function Video({ data }: Props) {
   const playerContainerRef = useRef<HTMLElement | null>(null);
 
   const [playerData, setPlayerData] = useRecoilState(playerAtom);
+  const [customPlayer, setCustomPlayer] = useRecoilState(customPlayerAtom);
+
+  const streamServerState = useRecoilValue(streamServerStateAtom);
 
   const [fullscreen, setFullscreen] = useState(false);
-  const [customPlayer, setCustomPlayer] = useState(false);
 
   // I HATE YOU YOUTUBE, I HATE YOU
   const getViews = (views: string) => {
@@ -97,7 +103,11 @@ export default function Video({ data }: Props) {
 
     // Choose for a custom player if the duration is <= 30 minutes, else spawn the normal yet buggy one
     let duration = getDuration(data.duration).split(':').reverse(); // [SS, MM, HH?]
-    if (duration.length < 3 && parseInt(duration[1]) <= 30) {
+    if (
+      duration.length < 3 &&
+      parseInt(duration[1]) <= 30 &&
+      streamServerState === 'up'
+    ) {
       setCustomPlayer(true);
     } else setCustomPlayer(false);
   }, []);
@@ -228,8 +238,8 @@ export default function Video({ data }: Props) {
                   controls
                   onPause={async () => {
                     setPlayerData({ id: playerData.id, playing: false });
-                    setFullscreen(false);
-                    await document.exitFullscreen();
+                    // setFullscreen(false);
+                    // await document.exitFullscreen();
                   }}
                   onPlay={() =>
                     setPlayerData({ id: playerData.id, playing: true })
@@ -243,25 +253,25 @@ export default function Video({ data }: Props) {
                     setPlayerData({ id: playerData.id, playing: true })
                   }
                   config={{
-                    youtube: { playerVars: { fs: 0, rel: 0, showinfo: 0 } },
+                    youtube: { playerVars: { fs: 1, rel: 0, showinfo: 0 } },
                   }}
                   playbackRate={playerData.playing ? 1 : 0.25}
                   muted={playerData.playing ? false : true}
                 />
               </section>
 
-              <section
+              {/* <section
                 className={`
-              flex flex-col items-center justify-center h-[348px] w-full
-              cursor-pointer absolute top-0
-            `}
+                  flex flex-col items-center justify-center h-[348px] w-full
+                  cursor-pointer absolute top-0
+                `}
                 onClick={() =>
                   setPlayerData({
                     id: playerData.id,
                     playing: !playerData.playing,
                   })
                 }
-              />
+              /> */}
             </>
           )}
 

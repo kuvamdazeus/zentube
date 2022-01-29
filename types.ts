@@ -1,12 +1,14 @@
-export interface IGoogleAuthResponse {
-  expires_at: number;
-  access_token: string;
-}
-
 interface Thumbnail {
   height: number;
   width: number;
   url: string;
+}
+
+export type IStreamServerState = 'down' | 'up';
+
+export interface IGoogleAuthResponse {
+  expires_at: number;
+  access_token: string;
 }
 
 export interface IUser {
