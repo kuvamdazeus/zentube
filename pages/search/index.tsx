@@ -1,7 +1,6 @@
 import { GetServerSideProps } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { getInfo } from 'ytdl-core';
 import { YT_GET_VIDEOS_DATA_URL } from '../../constants/youtubeAPI';
 
 interface _IVideoPreviewData {

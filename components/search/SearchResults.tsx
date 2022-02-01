@@ -2,9 +2,8 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { IoIosSearch } from 'react-icons/io';
 import { SiBuymeacoffee } from 'react-icons/si';
 import router from 'next/router';
-import cookie from 'react-cookies';
 import { useSetRecoilState } from 'recoil';
-import type { IGoogleAuthResponse, IVideo } from '../../types';
+import type { IVideo } from '../../types';
 import Video from '../../components/Video';
 import { searchInputAtom } from '../../state/atoms';
 import jwt from 'jsonwebtoken';
@@ -41,9 +40,6 @@ export default function SearchResults() {
 
   // YT, I HATE YOU!!!
   const fetchSearchResults = async (bypassUrlCheck = false) => {
-    const cookieData = cookie.load('token_data');
-    if (!cookieData) return null;
-
     const videoCache = sessionStorage.getItem('videos');
     if (videoCache) {
       interface _ISessionVideoCache {
@@ -58,8 +54,6 @@ export default function SearchResults() {
         return null;
       }
     }
-
-    const { expires_at, access_token }: IGoogleAuthResponse = cookieData;
 
     // // LOGOUT LOGIC
     // if (new Date() >= new Date(expires_at)) {
