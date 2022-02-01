@@ -3,6 +3,7 @@ import { IoIosSearch } from 'react-icons/io';
 import { SiBuymeacoffee } from 'react-icons/si';
 import router from 'next/router';
 import { useSetRecoilState } from 'recoil';
+import Spinner from 'react-spinner-material';
 import type { IVideo } from '../../types';
 import Video from '../../components/Video';
 import { searchInputAtom } from '../../state/atoms';
@@ -24,6 +25,7 @@ export default function SearchResults() {
   const [searchResults, setSearchResults] = useState<string[]>([]);
   const [searchInput, setSearchInput] = useState<string>(getUrlQuery());
   const [data, setData] = useState<IVideo[]>([]);
+  const [loading, setLoading] = useState(false);
   const [searchInputTimer, setSearchInputTimer] =
     useState<NodeJS.Timeout | null>(null);
 
@@ -55,6 +57,7 @@ export default function SearchResults() {
       }
     }
 
+    setLoading(true);
     // // LOGOUT LOGIC
     // if (new Date() >= new Date(expires_at)) {
     //   setUser(null);
@@ -73,6 +76,7 @@ export default function SearchResults() {
     const data = await fetch(`/api/search?q=${q}`).then((res) => res.json());
 
     setData(data);
+    setLoading(false);
     sessionStorage.setItem(
       'videos',
       JSON.stringify({ query: searchInput, data }),
@@ -170,8 +174,6 @@ export default function SearchResults() {
 
         <a
           href="https://buymeacoffee.com/kuvam"
-          target="_blank"
-          rel="noreferrer"
           className="lg:border border-yellow-400 lg:px-3 py-1.5 flex items-center cursor-pointer"
         >
           <SiBuymeacoffee className="mr-1 text-[22px] lg:text-[20px] text-yellow-400" />
@@ -207,6 +209,10 @@ export default function SearchResults() {
           ))}
         </section>
       )}
+
+      <section className={`flex justify-center pt-20 ${!loading && 'hidden'}`}>
+        <Spinner color="red" radius={80} visible={loading} stroke={6} />
+      </section>
 
       {/* {!auth && (
         <p className="text-center text-3xl text-light font-bold mt-56">
