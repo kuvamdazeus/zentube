@@ -14,6 +14,7 @@ export default async function middleware(req: any) {
     https://www.google.com/complete/search?client=hp&hl=en&sugexp=msedr&gs_rn=62&gs_ri=hp&cp=1&gs_id=9c&q=${search}&xhr=t
   `,
   );
+  console.log(res);
   const data = await res.json();
 
   const suggestions: string[] = data[1].map(
