@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
-import type { NextFetchEvent, NextRequest } from 'next/server';
 
-export function middleware(req: NextRequest, ev: NextFetchEvent) {
+export function middleware(req: any, ev: any) {
   const match = req.url.match(/\?q=([A-Za-z0-9\.\-_]+)/);
   let q: string | null;
 

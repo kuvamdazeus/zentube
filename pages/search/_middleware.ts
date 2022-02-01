@@ -1,6 +1,4 @@
-import type { NextFetchEvent, NextRequest } from 'next/server';
-
-export default function handler(req: NextRequest, ev: NextFetchEvent) {
+export default function handler(req: any, ev: any) {
   const q = new URL('https://something.com' + req.url).searchParams.get('q');
   if (!q) return Response.redirect('/');
 }
