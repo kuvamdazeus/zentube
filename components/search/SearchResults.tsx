@@ -1,19 +1,12 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { IoIosSearch } from 'react-icons/io';
 import { SiBuymeacoffee } from 'react-icons/si';
-import { MdOutlineLogout } from 'react-icons/md';
 import router from 'next/router';
 import cookie from 'react-cookies';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-import {
-  YT_GET_CHANNELS_DATA_URL,
-  YT_GET_SEARCH_RESULTS_URL,
-  YT_GET_VIDEOS_DATA_URL,
-} from '../../constants/youtubeAPI';
+import { useSetRecoilState } from 'recoil';
 import type { IGoogleAuthResponse, IVideo } from '../../types';
 import Video from '../../components/Video';
 import { searchInputAtom } from '../../state/atoms';
-import { useGoogleLogin } from 'react-google-login';
 import jwt from 'jsonwebtoken';
 
 export default function SearchResults() {

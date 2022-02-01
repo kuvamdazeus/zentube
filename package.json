@@ -17,12 +17,8 @@
     "react-google-login": "^5.2.2",
     "react-icons": "^4.3.1",
     "react-player": "^2.9.0",
-    "react-youtube": "^7.14.0",
     "recoil": "^0.5.2",
-    "video-react": "^0.15.0",
-    "youtubei": "^0.0.1-rc.27",
-    "yt-search": "^2.10.3",
-    "ytdl-core": "^4.10.0"
+    "yt-search": "^2.10.3"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.6",

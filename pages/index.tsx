@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { NextPage } from 'next';
 import router from 'next/router';
-import { GoogleLoginResponse, useGoogleLogin } from 'react-google-login';
-import { useSetRecoilState } from 'recoil';
-import cookie from 'react-cookies';
 
 const Home: NextPage = () => {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
