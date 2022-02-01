@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { IoIosSearch } from 'react-icons/io';
-import { CgProfile } from 'react-icons/cg';
+import { SiBuymeacoffee } from 'react-icons/si';
 import { MdOutlineLogout } from 'react-icons/md';
 import router from 'next/router';
 import cookie from 'react-cookies';
@@ -12,8 +12,9 @@ import {
 } from '../../constants/youtubeAPI';
 import type { IGoogleAuthResponse, IVideo } from '../../types';
 import Video from '../../components/Video';
-import { authAtom, searchInputAtom, userAtom } from '../../state/atoms';
+import { searchInputAtom } from '../../state/atoms';
 import { useGoogleLogin } from 'react-google-login';
+import jwt from 'jsonwebtoken';
 
 export default function SearchResults() {
   const getUrlQuery = () =>
@@ -24,8 +25,6 @@ export default function SearchResults() {
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [user, setUser] = useRecoilState(userAtom);
-  const [auth, setAuth] = useRecoilState(authAtom);
   const setSearchInputElem = useSetRecoilState<HTMLInputElement | null>(
     searchInputAtom,
   );
@@ -61,7 +60,7 @@ export default function SearchResults() {
 
       const cachedData: _ISessionVideoCache = JSON.parse(videoCache);
 
-      if (cachedData.query === getUrlQuery().toLowerCase() && auth) {
+      if (cachedData.query === getUrlQuery().toLowerCase()) {
         setData(cachedData.data);
         return null;
       }
@@ -69,88 +68,23 @@ export default function SearchResults() {
 
     const { expires_at, access_token }: IGoogleAuthResponse = cookieData;
 
-    // LOGOUT LOGIC
-    if (new Date() >= new Date(expires_at)) {
-      setUser(null);
-      cookie.remove('token_data');
-      setAuth(false);
-      return null;
-    }
+    // // LOGOUT LOGIC
+    // if (new Date() >= new Date(expires_at)) {
+    //   setUser(null);
+    //   cookie.remove('token_data');
+    //   setAuth(false);
+    //   return null;
+    // }
 
-    if (!auth || (searchInput === getUrlQuery() && !bypassUrlCheck))
-      return null;
+    if (searchInput === getUrlQuery() && !bypassUrlCheck) return null;
     // TODO: show errors
 
-    // Search REQUEST
-    console.info('FETCHING SEARCH RESULTS');
-    const searchRes = await fetch(YT_GET_SEARCH_RESULTS_URL(searchInput), {
-      headers: {
-        Authorization: 'Bearer ' + access_token,
-      },
-    });
-    if (searchRes.status !== 200)
-      return console.log('SET ERRORS & DISPLAY THEM', searchRes);
-    const searchData = await searchRes.json();
+    const q = jwt.sign(
+      searchInput,
+      process.env.NEXT_PUBLIC_JWT_SECRET as string,
+    );
+    const data = await fetch(`/api/search?q=${q}`).then((res) => res.json());
 
-    const videoIds = searchData.items.map(
-      (videoItem: any) => videoItem.id.videoId,
-    ) as string[];
-
-    // Videos data fetch REQUEST
-    const videosRes = await fetch(YT_GET_VIDEOS_DATA_URL(videoIds), {
-      headers: {
-        Authorization: 'Bearer ' + access_token,
-      },
-    });
-
-    if (videosRes.status !== 200)
-      return console.log('SET ERRORS & DISPLAY', videosRes);
-    const videosData = await videosRes.json();
-
-    const channelIds: string[] = [];
-    const videos = videosData.items.map((videoData: any) => {
-      channelIds.push(videoData.snippet.channelId);
-
-      const { title, description, thumbnails, channelId, publishedAt } =
-        videoData.snippet;
-      const { duration } = videoData.contentDetails;
-      const { viewCount, likeCount } = videoData.statistics;
-      return {
-        id: videoData.id,
-        title,
-        description,
-        viewCount,
-        likeCount,
-        duration,
-        thumbnails,
-        channelId,
-        publishedAt,
-      };
-    });
-
-    // Corresponding videos' channel fetch REQUEST
-    const channelRes = await fetch(YT_GET_CHANNELS_DATA_URL(channelIds), {
-      headers: {
-        Authorization: 'Bearer ' + access_token,
-      },
-    });
-
-    if (channelRes.status !== 200)
-      return console.log('SET ERRORS & DISPLAY', channelRes);
-    const channelsData = await channelRes.json();
-
-    const channels: { [key: string]: any } = {};
-    channelsData.items.forEach((channel: any) => {
-      const { title, thumbnails, customUrl } = channel.snippet;
-      channels[channel.id as string] = { title, thumbnails, customUrl };
-    });
-
-    const data: IVideo[] = videos.map((video: any) => {
-      return { ...video, channelData: channels[video.channelId] };
-    });
-
-    // 3 FETCH REQUESTS
-    // FUCKIN' SWEAR TO GOD, if there's a stupid 400 error, i'm gonna lose it
     setData(data);
     sessionStorage.setItem(
       'videos',
@@ -158,21 +92,21 @@ export default function SearchResults() {
     );
   };
 
-  const handleSuccess = (data: any) => {
-    const {
-      expires_at,
-      access_token,
-    }: { expires_at: number; access_token: string } = data.tokenObj;
+  // const handleSuccess = (data: any) => {
+  //   const {
+  //     expires_at,
+  //     access_token,
+  //   }: { expires_at: number; access_token: string } = data.tokenObj;
 
-    const { name, imageUrl } = data.profileObj;
-    setUser({ name, imageUrl });
+  //   const { name, imageUrl } = data.profileObj;
+  //   setUser({ name, imageUrl });
 
-    cookie.save('token_data', JSON.stringify({ expires_at, access_token }), {
-      path: '/',
-    });
+  //   cookie.save('token_data', JSON.stringify({ expires_at, access_token }), {
+  //     path: '/',
+  //   });
 
-    setAuth(true);
-  };
+  //   setAuth(true);
+  // };
 
   const handleSearchInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -183,28 +117,29 @@ export default function SearchResults() {
     clearTimeout(searchInputTimer as NodeJS.Timeout);
     setSearchInputTimer(
       setTimeout(async () => {
-        const res = await fetch(`/api/search?q=${e.target.value}`);
-        const data = await res.json();
+        const res = await fetch(`/api/autocomplete?q=${e.target.value}`);
+        const data = (await res.json()) as string[];
         setSearchResults(data);
       }, 300),
     );
   };
 
-  const { signIn } = useGoogleLogin({
-    clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
-    onSuccess: handleSuccess,
-    onFailure: console.error,
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
-  });
+  // const { signIn } = useGoogleLogin({
+  //   clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
+  //   onSuccess: handleSuccess,
+  //   onFailure: console.error,
+  //   scope: 'https://www.googleapis.com/auth/youtube.readonly',
+  // });
 
   useEffect(() => {
-    if (cookie.load('token_data')) setAuth(true);
+    // if (cookie.load('token_data')) setAuth(true);
     setSearchInputElem(searchInputRef.current);
+    fetchSearchResults(true);
   }, []);
 
-  useEffect(() => {
-    if (auth) fetchSearchResults(true);
-  }, [auth]);
+  // useEffect(() => {
+  //   if (auth) fetchSearchResults(true);
+  // }, [auth]);
 
   return (
     <section className="text-white relative">
@@ -245,18 +180,16 @@ export default function SearchResults() {
           </div>
         </div>
 
-        {/* TODO: Add signIn logic to *this* div */}
-        {!auth && (
-          <div
-            onClick={signIn}
-            className="lg:border border-blue-400 lg:px-3 py-1.5 flex items-center cursor-pointer"
-          >
-            <CgProfile className="text-blue-400 mr-1 text-[22px] lg:text-[20px]" />
-            <p className="hidden lg:block text-blue-400 font-bold">SIGN IN</p>
-          </div>
-        )}
+        <a
+          href="https://buymeacoffee.com/kuvam"
+          target="_blank"
+          className="lg:border border-yellow-400 lg:px-3 py-1.5 flex items-center cursor-pointer"
+        >
+          <SiBuymeacoffee className="mr-1 text-[22px] lg:text-[20px] text-yellow-400" />
+          <p className="hidden lg:block text-yellow-400 font-bold">LIKE IT?</p>
+        </a>
 
-        {auth && (
+        {/* {auth && (
           <div
             // className="
             //   lg:px-3 py-1 rounded border border-red-500 text-red-500 cursor-pointer
@@ -274,11 +207,11 @@ export default function SearchResults() {
             <MdOutlineLogout className="text-red-500 mr-1 text-[22px] lg:text-[20px]" />
             <p className="hidden lg:block text-red-500 font-bold">LOGOUT</p>
           </div>
-        )}
+        )} */}
       </nav>
       {/* --- */}
 
-      {auth && data && (
+      {data && (
         <section className="pt-3 lg:pt-7 px-5 lg:px-10">
           {data.map((video) => (
             <Video key={video.id} data={video} />
@@ -286,7 +219,7 @@ export default function SearchResults() {
         </section>
       )}
 
-      {!auth && (
+      {/* {!auth && (
         <p className="text-center text-3xl text-light font-bold mt-56">
           Please{' '}
           <span
@@ -299,7 +232,7 @@ export default function SearchResults() {
           </span>{' '}
           with <span className="text-red-900">Google</span> to use this app
         </p>
-      )}
+      )} */}
 
       {/* --- */}
 

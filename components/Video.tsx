@@ -12,6 +12,8 @@ interface Props {
 }
 
 export default function Video({ data }: Props) {
+  console.log(data);
+
   const getUrlQuery = () =>
     String(new URL(window.location.href).searchParams.get('q'));
 
@@ -138,14 +140,14 @@ export default function Video({ data }: Props) {
                 { shallow: true },
               );
             }}
-            className="w-full lg:w-max object-cover lg:object-contain cursor-pointer"
-            src={data.thumbnails.medium.url}
+            className="w-full lg:w-96 object-cover lg:object-contain cursor-pointer"
+            src={data.thumbnail}
           />
 
           <div className="w-full flex justify-between -mt-7 -ml-1">
             <div />
             <div className="bg-black opacity-80 p-1">
-              <p className="text-xs">{getDuration(data.duration)}</p>
+              <p className="text-xs">{data.duration}</p>
             </div>
           </div>
         </div>
@@ -172,7 +174,7 @@ export default function Video({ data }: Props) {
 
           <div className="flex items-center my-4">
             <img
-              src={data.channelData.thumbnails.default.url}
+              src={data.channelData.thumbnail}
               className="object-contain h-7 rounded-full mr-1.5"
             />
             <p className="text-xs text-gray-400 font-light">
@@ -187,7 +189,7 @@ export default function Video({ data }: Props) {
 
         <div className="flex lg:hidden w-full mt-4">
           <img
-            src={data.channelData.thumbnails.default.url}
+            src={data.channelData.thumbnail}
             className="object-contain h-10 rounded-full mr-3"
           />
 

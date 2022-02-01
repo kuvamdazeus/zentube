@@ -3,7 +3,6 @@ import type { NextPage } from 'next';
 import router from 'next/router';
 import { GoogleLoginResponse, useGoogleLogin } from 'react-google-login';
 import { useSetRecoilState } from 'recoil';
-import { authAtom, userAtom } from '../state/atoms';
 import cookie from 'react-cookies';
 
 const Home: NextPage = () => {
@@ -14,9 +13,6 @@ const Home: NextPage = () => {
   const [searchInputTimer, setSearchInputTimer] =
     useState<NodeJS.Timeout | null>(null);
 
-  const setUser = useSetRecoilState(userAtom);
-  const setAuth = useSetRecoilState(authAtom);
-
   const onSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
     setSearchResults([]);
@@ -26,7 +22,7 @@ const Home: NextPage = () => {
     clearTimeout(searchInputTimer as NodeJS.Timeout);
     setSearchInputTimer(
       setTimeout(async () => {
-        const res = await fetch(`/api/search?q=${e.target.value}`);
+        const res = await fetch(`/api/autocomplete?q=${e.target.value}`);
         const data = await res.json();
         setSearchResults(data);
       }, 300),
@@ -39,33 +35,35 @@ const Home: NextPage = () => {
   ) => {
     if (e) e.preventDefault();
 
-    const tokenData = cookie.load('token_data');
+    // const tokenData = cookie.load('token_data');
 
-    if (!tokenData) signIn();
-    else if (tokenData && !!searchInput.trim())
-      router.push('/search?q=' + searchInputQuery);
+    // if (!tokenData) signIn();
+    // else if (tokenData && !!searchInput.trim())
+    //   router.push('/search?q=' + searchInputQuery);
+
+    if (!!searchInput.trim()) router.push('/search?q=' + searchInputQuery);
   };
 
-  const handleFame = (data: GoogleLoginResponse) => {
-    const { expires_at, access_token } = data.tokenObj;
+  // const handleFame = (data: GoogleLoginResponse) => {
+  //   const { expires_at, access_token } = data.tokenObj;
 
-    const { name, imageUrl } = data.profileObj;
-    setUser({ name, imageUrl });
+  //   const { name, imageUrl } = data.profileObj;
+  //   setUser({ name, imageUrl });
 
-    cookie.save('token_data', JSON.stringify({ expires_at, access_token }), {
-      path: '/',
-    });
+  //   cookie.save('token_data', JSON.stringify({ expires_at, access_token }), {
+  //     path: '/',
+  //   });
 
-    setAuth(true);
-    router.push('/search?q=' + searchInput);
-  };
+  //   setAuth(true);
+  //   router.push('/search?q=' + searchInput);
+  // };
 
-  const { signIn } = useGoogleLogin({
-    clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
-    onSuccess: (data) => handleFame(data as GoogleLoginResponse),
-    onFailure: console.error,
-    scope: 'https://www.googleapis.com/auth/youtube.readonly',
-  });
+  // const { signIn } = useGoogleLogin({
+  //   clientId: process.env.NEXT_PUBLIC_GAUTH_CLIENTID as string,
+  //   onSuccess: (data) => handleFame(data as GoogleLoginResponse),
+  //   onFailure: console.error,
+  //   scope: 'https://www.googleapis.com/auth/youtube.readonly',
+  // });
 
   useEffect(() => {
     // TODO: Make keyboard operable suggestion box & componentiate the thing

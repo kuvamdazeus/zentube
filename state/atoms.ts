@@ -1,10 +1,10 @@
 import { atom } from 'recoil';
 import { IPlayer, IUser } from '../types';
 
-export const userAtom = atom<IUser | null>({
-  key: 'userAtom',
-  default: null,
-});
+// export const userAtom = atom<IUser | null>({
+//   key: 'userAtom',
+//   default: null,
+// });
 
 export const searchInputAtom = atom<HTMLInputElement | null>({
   key: 'searchInputAtom',
@@ -16,10 +16,10 @@ export const playerAtom = atom<IPlayer | null>({
   default: null,
 });
 
-export const authAtom = atom({
-  key: 'authAtom',
-  default: false,
-});
+// export const authAtom = atom({
+//   key: 'authAtom',
+//   default: false,
+// });
 
 export const customPlayerAtom = atom({
   key: 'customPlayerAtom',

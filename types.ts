@@ -25,15 +25,13 @@ export interface IVideo {
   id: string;
   channelData: {
     title: string;
-    customUrl: string;
-    thumbnails: { default: Thumbnail; medium: Thumbnail; high: Thumbnail };
+    thumbnail: string;
   };
-  channelId: string;
   description: string;
   duration: string;
   likeCount: string;
   viewCount: string;
   title: string;
-  thumbnails: { default: Thumbnail; medium: Thumbnail; high: Thumbnail };
+  thumbnail: string;
   publishedAt: string;
 }
