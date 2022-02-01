@@ -21,8 +21,6 @@ export default async function handler(
     return res.status(200).send('🧐');
   }
 
-  console.log(searchQuery);
-
   const data = await yts(searchQuery);
   const videos: IVideo[] = [];
 
@@ -81,6 +79,5 @@ export default async function handler(
     video.channelData.thumbnail = corrYtChannel.snippet.thumbnails.default.url;
   });
 
-  console.log(videos);
   return res.status(200).json(videos);
 }

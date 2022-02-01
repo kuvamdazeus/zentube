@@ -1,8 +1,8 @@
 import { GetServerSideProps } from 'next';
 import dynamic from 'next/dynamic';
-import { YT_GET_VIDEOS_DATA_URL } from '../../constants/youtubeAPI';
-import fetch from 'node-fetch';
 import Head from 'next/head';
+import { getInfo } from 'ytdl-core';
+import { YT_GET_VIDEOS_DATA_URL } from '../../constants/youtubeAPI';
 
 interface _IVideoPreviewData {
   title: string;
@@ -64,7 +64,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
           0,
           100,
         ),
-        thumbnail: data.items[0].snippet.thumbnails.medium.url,
+        thumbnail: data.items[0].snippet.thumbnails.high.url,
       };
     }
   }
