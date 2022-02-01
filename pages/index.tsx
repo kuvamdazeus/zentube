@@ -100,6 +100,7 @@ const Home: NextPage = () => {
                   setSearchResults([]);
                   if (searchInputRef.current) searchInputRef.current.focus();
                 }}
+                key={searchInput + searchResult}
               >
                 <p className="text-gray-300">
                   {searchInput}

@@ -176,6 +176,7 @@ export default function SearchResults() {
         <a
           href="https://buymeacoffee.com/kuvam"
           target="_blank"
+          rel="noreferrer"
           className="lg:border border-yellow-400 lg:px-3 py-1.5 flex items-center cursor-pointer"
         >
           <SiBuymeacoffee className="mr-1 text-[22px] lg:text-[20px] text-yellow-400" />
