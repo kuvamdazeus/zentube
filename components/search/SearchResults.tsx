@@ -111,6 +111,7 @@ export default function SearchResults() {
     setSearchInputTimer(
       setTimeout(async () => {
         const res = await fetch(`/api/autocomplete?q=${e.target.value}`);
+        console.log(res);
         const data = (await res.json()) as string[];
         setSearchResults(data);
       }, 300),
