@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { NextPage } from 'next';
 import router from 'next/router';
+import Head from 'next/head';
 
 const Home: NextPage = () => {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -69,6 +70,9 @@ const Home: NextPage = () => {
 
   return (
     <section className="text-white flex justify-center h-screen">
+      <Head>
+        <title>ZenTUBE - A Distraction-Free YouTube ✨</title>
+      </Head>
       <div className="flex flex-col items-center mt-[20%]">
         <img
           className="object-contain h-[70px] lg:h-[100px] mb-5"
