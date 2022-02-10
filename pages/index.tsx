@@ -100,7 +100,7 @@ const Home: NextPage = () => {
                   border-b border-t border-[rgb(45,45,45)] p-2 cursor-pointer hover:bg-light
                 "
                 onClick={() => {
-                  setSearchInput(searchInput + searchResult);
+                  setSearchInput(searchInput.trim() + searchResult);
                   setSearchResults([]);
                   if (searchInputRef.current) searchInputRef.current.focus();
                 }}
