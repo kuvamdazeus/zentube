@@ -1,21 +1,25 @@
-export default async function middleware(req: any) {
+import { NextApiRequest, NextApiResponse } from 'next';
+import fetch from 'node-fetch';
+
+export default async function middleware(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const search = new URL('http://something.com' + req.url).searchParams.get(
     'q',
   );
 
   if (!search)
-    return new Response(
-      'Error, please provide a valid "search" query in url!',
-      { status: 400 },
-    );
+    return res
+      .status(400)
+      .send('Error, please provide a valid "search" query in url!');
 
-  const res = await fetch(
+  const fetchRes = await fetch(
     `
     https://www.google.com/complete/search?client=hp&hl=en&sugexp=msedr&gs_rn=62&gs_ri=hp&cp=1&gs_id=9c&q=${search}&xhr=t
   `,
   );
-  console.log(res);
-  const data = await res.json();
+  const data: any = await fetchRes.json();
 
   const suggestions: string[] = data[1].map(
     (rawSuggestion: [string, number, any]) => {
@@ -26,7 +30,5 @@ export default async function middleware(req: any) {
         )[1];
     },
   );
-  return new Response(
-    JSON.stringify(suggestions.filter((suggestion) => !!suggestion)),
-  );
+  return res.status(200).send(suggestions.filter((suggestion) => !!suggestion));
 }
