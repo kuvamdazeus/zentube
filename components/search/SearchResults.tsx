@@ -140,14 +140,7 @@ export default function SearchResults() {
           className="h-6 lg:h-8 flex-shrink-0 cursor-pointer"
           onClick={() => router.push('/')}
         >
-          <img
-            src="/logo.png"
-            className="object-contain h-full hidden lg:block"
-          />
-          <img
-            src="/logo_mobile.svg.png"
-            className="object-contain h-full lg:hidden"
-          />
+          <img src="/logo_mobile.svg.png" className="object-contain h-full" />
         </div>
 
         <div className="flex items-center">

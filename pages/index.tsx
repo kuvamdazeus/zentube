@@ -73,9 +73,9 @@ const Home: NextPage = () => {
       <Head>
         <title>ZenTUBE - A Distraction-Free YouTube ✨</title>
       </Head>
-      <div className="flex flex-col items-center mt-[20%]">
+      <div className="flex flex-col items-center mt-[20%] lg:mt-[10%]">
         <img
-          className="object-contain h-[70px] lg:h-[100px] mb-5"
+          className="object-contain h-[200px] lg:h-[300px] mb-5"
           src="/logo.png"
         />
 
