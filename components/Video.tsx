@@ -254,7 +254,7 @@ export default function Video({ data }: Props) {
               }
 
               return (
-                <p className="">
+                <p className="break-words text-sm lg:text-base">
                   {regMatch && regMatch.index
                     ? line.slice(0, regMatch.index)
                     : line}
