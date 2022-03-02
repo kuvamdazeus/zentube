@@ -12,8 +12,6 @@ interface Props {
 }
 
 export default function Video({ data }: Props) {
-  console.log(data);
-
   const getUrlQuery = () =>
     String(new URL(window.location.href).searchParams.get('q'));
 
@@ -242,9 +240,42 @@ export default function Video({ data }: Props) {
               config={{
                 youtube: { playerVars: { fs: 1, rel: 0, showinfo: 0 } },
               }}
-              playbackRate={playerData.playing ? 1 : 0.25}
               muted={playerData.playing ? false : true}
             />
+          </section>
+
+          <section className="p-3 text-gray-200">
+            {data.description.split('\n').map((line) => {
+              const regMatch = line.match(/https:\/\/\S+/);
+              if (regMatch && regMatch.index) {
+                console.log(
+                  line.slice(regMatch.index + regMatch[0].length, line.length),
+                );
+              }
+
+              return (
+                <p className="">
+                  {regMatch && regMatch.index
+                    ? line.slice(0, regMatch.index)
+                    : line}
+                  {regMatch && (
+                    <a
+                      className="text-blue-500 italic"
+                      target="_blank"
+                      href={regMatch[0]}
+                    >
+                      {regMatch[0]}
+                    </a>
+                  )}
+                  {regMatch &&
+                    regMatch.index &&
+                    line.slice(
+                      regMatch.index + regMatch[0].length,
+                      line.length,
+                    )}
+                </p>
+              );
+            })}
           </section>
 
           {/* <section

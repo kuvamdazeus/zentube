@@ -40,7 +40,6 @@ export default function SearchResults() {
     }
   };
 
-  // YT, I HATE YOU!!!
   const fetchSearchResults = async (bypassUrlCheck = false) => {
     const videoCache = sessionStorage.getItem('videos');
     if (videoCache) {
@@ -67,7 +66,6 @@ export default function SearchResults() {
     // }
 
     if (searchInput === getUrlQuery() && !bypassUrlCheck) return null;
-    // TODO: show errors
 
     const q = jwt.sign(
       searchInput,
