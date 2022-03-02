@@ -247,11 +247,6 @@ export default function Video({ data }: Props) {
           <section className="p-3 text-gray-200">
             {data.description.split('\n').map((line) => {
               const regMatch = line.match(/https:\/\/\S+/);
-              if (regMatch && regMatch.index) {
-                console.log(
-                  line.slice(regMatch.index + regMatch[0].length, line.length),
-                );
-              }
 
               return (
                 <p className="break-words text-sm lg:text-base">
